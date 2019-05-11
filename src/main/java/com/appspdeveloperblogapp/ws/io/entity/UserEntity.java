@@ -1,14 +1,15 @@
 package com.appspdeveloperblogapp.ws.io.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity(name="users")
 public class UserEntity implements Serializable{
+
+
 
 	/**
 	 * 
@@ -31,8 +32,8 @@ public class UserEntity implements Serializable{
 	@Column(nullable=false, length=120)
 	private String email;
 	
-	@Column(nullable=false)
-	private String encrptedPassword;
+	@Column(nullable=false, length=120)
+	private String encryptedPassword;
 	
     private String emailVerificationToken;
 	
@@ -80,11 +81,11 @@ public class UserEntity implements Serializable{
 	}
 
 	public String getEncrptedPassword() {
-		return encrptedPassword;
+		return encryptedPassword;
 	}
 
 	public void setEncrptedPassword(String encrptedPassword) {
-		this.encrptedPassword = encrptedPassword;
+		this.encryptedPassword = encrptedPassword;
 	}
 
 	public String getEmailVerificationToken() {

@@ -1,13 +1,12 @@
 package com.appspdeveloperblogapp.ws.io.repositories;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
 import com.appspdeveloperblogapp.ws.io.entity.UserEntity;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface UserRepository extends CrudRepository<UserEntity, Long> {
+public interface UserRepository extends PagingAndSortingRepository<UserEntity, Long> {
     
 	UserEntity findByEmail(String email);
 	UserEntity findByUserId(String userId);

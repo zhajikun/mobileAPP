@@ -1,20 +1,20 @@
 package com.appspdeveloperblogapp.ws.ui.controller;
 
 
-import com.appspdeveloperblogapp.ws.exceptions.UserServiceException;
-import com.appspdeveloperblogapp.ws.ui.model.response.ErrorMessages;
+import com.appspdeveloperblogapp.ws.service.UserService;
+import com.appspdeveloperblogapp.ws.shared.dto.UserDto;
+import com.appspdeveloperblogapp.ws.ui.model.request.RequestOperationName;
+import com.appspdeveloperblogapp.ws.ui.model.request.UserDetailsRequestModel;
+import com.appspdeveloperblogapp.ws.ui.model.response.OperationStatusModel;
+import com.appspdeveloperblogapp.ws.ui.model.response.RequestOperationStatus;
+import com.appspdeveloperblogapp.ws.ui.model.response.UserRest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import com.appspdeveloperblogapp.ws.service.UserService;
-import com.appspdeveloperblogapp.ws.shared.dto.UserDto;
-import com.appspdeveloperblogapp.ws.ui.model.request.UserDetailsRequestModel;
-import com.appspdeveloperblogapp.ws.ui.model.response.UserRest;
-
-import javax.print.attribute.standard.Media;
-import javax.print.attribute.standard.MediaTray;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("users") //http://localhost:8080/users
@@ -38,7 +38,7 @@ public class UserController {
 	public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws Exception{
 		UserRest returnValue = new UserRest();
 
-		if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+		//if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(userDetails, userDto);
@@ -49,13 +49,51 @@ public class UserController {
 		return returnValue;
 	}
 	
-	@PutMapping
-	public String updateUser() {
-		return "update user was called";
+	@PutMapping(path = "/{id}",
+		consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
+		produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+	public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
+
+		UserRest returnValue = new UserRest();
+
+		//if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+
+		UserDto userDto = new UserDto();
+		BeanUtils.copyProperties(userDetails, userDto);
+
+		UserDto updatedUser = userService.updateUser(id, userDto);
+		BeanUtils.copyProperties(updatedUser, returnValue);
+
+		return returnValue;
 	}
-	
-	@DeleteMapping
-	public String deleteUser() {
-		return "delete user was called";
+
+
+	@DeleteMapping(path = "/{id}",
+			produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE } )
+	public OperationStatusModel deleteUser(@PathVariable String id) {
+		OperationStatusModel returnValue = new OperationStatusModel();
+        returnValue.setOperationName(RequestOperationName.DELETE.name());
+
+        userService.deleteUser(id);
+
+        returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+		return returnValue;
+	}
+
+	@GetMapping
+	public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "0") int page, @RequestParam(value="limit", defaultValue = "25") int limit){
+		List<UserRest> returnValue = new ArrayList<>();
+        if(page > 0) page = page -1;
+
+        List<UserDto> users = userService.getUsers(page, limit);
+
+        for(UserDto userDto : users){
+           UserRest userModel = new UserRest();
+           BeanUtils.copyProperties(userDto, userModel);
+           returnValue.add(userModel);
+		}
+
+		return returnValue;
 	}
 }
