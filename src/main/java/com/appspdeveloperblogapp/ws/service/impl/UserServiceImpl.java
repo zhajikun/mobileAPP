@@ -11,6 +11,7 @@ import com.appspdeveloperblogapp.ws.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,8 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
         userEntity.setEmailVerificationStatus(false);
 
-        UserEntity storedUserDetailes = userRepository.save(userEntity);
+		UserEntity storedUserDetailes = userRepository.save(userEntity);
+
 		UserDto returnValue = modelMapper.map(storedUserDetailes, UserDto.class);
 
 		return returnValue;
