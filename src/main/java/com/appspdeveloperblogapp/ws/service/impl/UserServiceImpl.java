@@ -8,7 +8,6 @@ import com.appspdeveloperblogapp.ws.shared.Utils;
 import com.appspdeveloperblogapp.ws.shared.dto.AddressDTO;
 import com.appspdeveloperblogapp.ws.shared.dto.UserDto;
 import com.appspdeveloperblogapp.ws.ui.model.response.ErrorMessages;
-import org.apache.tomcat.jni.Address;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +60,9 @@ public class UserServiceImpl implements UserService {
 		userEntity.setUserId(publicUserId);
 		userEntity.setEncrptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
+        userEntity.setEmailVerificationStatus(false);
 
-		UserEntity storedUserDetailes = userRepository.save(userEntity);
+        UserEntity storedUserDetailes = userRepository.save(userEntity);
 		UserDto returnValue = modelMapper.map(storedUserDetailes, UserDto.class);
 
 		return returnValue;
@@ -88,10 +87,15 @@ public class UserServiceImpl implements UserService {
 			throw new UsernameNotFoundException(email);
 		}
 
+		// return new User(userEntity.getEmail(), userEntity.getEncrptedPassword(), new ArrayList<>());
 
-	//	return new User(userEntity.getEmail(), userEntity.getEncrptedPassword(), new ArrayList<>());
-
-	return new User()
+	    return new User(userEntity.getEmail(),
+                        userEntity.getEncrptedPassword(),
+                         userEntity.getEmailVerificationStatus(),
+                         true,
+                         true,
+                         true,
+                           new ArrayList<>());
 	}
 
 
@@ -149,7 +153,7 @@ public class UserServiceImpl implements UserService {
 	public boolean verifyEmailToken(String token) {
 		boolean returnValue = false;
 
-		UserEntity userEntity = userRepository.finUserByEmailVerificationToken(token);
+		UserEntity userEntity = userRepository.findUserByEmailVerificationToken(token);
 		if(userEntity != null){
 			boolean hastokenExpried = Utils.hasTokenExpired(token);
 			if(!hastokenExpried){
