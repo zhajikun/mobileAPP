@@ -12,6 +12,7 @@ import org.apache.tomcat.jni.Address;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
 		userEntity.setUserId(publicUserId);
 		userEntity.setEncrptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
-
+        userEntity.setEmailVerificationStatus(false);
 		UserEntity storedUserDetailes = userRepository.save(userEntity);
 		UserDto returnValue = modelMapper.map(storedUserDetailes, UserDto.class);
 
@@ -88,10 +89,15 @@ public class UserServiceImpl implements UserService {
 			throw new UsernameNotFoundException(email);
 		}
 
+		// return new User(userEntity.getEmail(), userEntity.getEncrptedPassword(), new ArrayList<>());
 
-	//	return new User(userEntity.getEmail(), userEntity.getEncrptedPassword(), new ArrayList<>());
-
-	return new User()
+	    return new User(userEntity.getEmail(),
+                        userEntity.getEncrptedPassword(),
+                         userEntity.getEmailVerificationStatus(),
+                         true,
+                         true,
+                         true,
+                           new ArrayList<>());
 	}
 
 
