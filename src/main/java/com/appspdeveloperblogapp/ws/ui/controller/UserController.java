@@ -5,14 +5,14 @@ import com.appspdeveloperblogapp.ws.service.AddressService;
 import com.appspdeveloperblogapp.ws.service.UserService;
 import com.appspdeveloperblogapp.ws.shared.dto.AddressDTO;
 import com.appspdeveloperblogapp.ws.shared.dto.UserDto;
+import com.appspdeveloperblogapp.ws.ui.model.request.PasswordResetModel;
+import com.appspdeveloperblogapp.ws.ui.model.request.PasswordResetRequestModel;
 import com.appspdeveloperblogapp.ws.ui.model.request.RequestOperationName;
 import com.appspdeveloperblogapp.ws.ui.model.request.UserDetailsRequestModel;
 import com.appspdeveloperblogapp.ws.ui.model.response.AddressesRest;
 import com.appspdeveloperblogapp.ws.ui.model.response.OperationStatusModel;
 import com.appspdeveloperblogapp.ws.ui.model.response.RequestOperationStatus;
 import com.appspdeveloperblogapp.ws.ui.model.response.UserRest;
-import org.apache.tomcat.jni.Address;
-import org.apache.tomcat.jni.User;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -166,7 +166,7 @@ public class UserController {
 
     // http://localhost:8080/mobile-app-ws/users/email-verification?token=sdfsdf
     @GetMapping(path = "/email-verification",
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel verifyEmailToken(@RequestParam(value="token") String token){
        OperationStatusModel returnValue = new OperationStatusModel();
        returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
@@ -179,5 +179,42 @@ public class UserController {
        return returnValue;
     }
 
+	// http://localhost:8080/mobile-app-ws/users/password-reset-request
+    @PostMapping(path="/password-reset-request",
+			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+	)
+	public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel passwordREquestModel){
+        OperationStatusModel returnValue = new OperationStatusModel();
+        boolean operationResult = userService.requestPasswordReset(passwordREquestModel.getEmail());
+
+        returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());
+		returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+		if(operationResult){
+			returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		}
+
+		return returnValue;
+	}
+
+    @PostMapping(path="/password-reset",
+			consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+
+	public OperationStatusModel requestReset(@RequestBody PasswordResetModel passwordResetModel){
+		OperationStatusModel returnValue =  new OperationStatusModel();
+
+		boolean operationResult = userService.resetPassword(
+		 passwordResetModel.getToken(),
+		 passwordResetModel.getPassword());
+
+		returnValue.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+		returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+		if(operationResult){
+			returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		}
+
+		return returnValue;
+	}
 
 }
